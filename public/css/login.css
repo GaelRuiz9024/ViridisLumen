@@ -1,0 +1,66 @@
+/* Fondo con degradado */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #2e3b55, #1c2537);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
+
+/* Contenedor transparente */
+.login-container {
+    background: rgba(255, 255, 255, 0.1); /* Transparencia */
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.3);
+    width: 350px;
+    text-align: center;
+}
+
+/* Avatar */
+.avatar img {
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+/* Inputs estilizados con transparencia */
+.login-form input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.2); /* Transparencia */
+    color: #fff; /* Texto blanco */
+    font-size: 16px;
+    outline: none;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Efecto hover y focus en inputs */
+.login-form input:focus {
+    background: rgba(255, 255, 255, 0.3); /* Un poco más opaco */
+    box-shadow: 0px 0px 10px #a3e635;
+}
+
+/* Botón estilizado */
+.login-form button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background: #4ca3dd;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 10px;
+}
+
+/* Efecto hover en el botón */
+.login-form button:hover {
+    background: #a3e635;
+}

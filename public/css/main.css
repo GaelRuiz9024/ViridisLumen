@@ -1,0 +1,86 @@
+
+/* General styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Navbar styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #0f172a, #142850); /* Ajuste de color */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    height: 80px; /* Más alto */
+}
+
+.navbar span,
+.navbar a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    transition: color 0.3s ease;
+}
+
+.navbar a.active {
+    color: #a3e635; /* Amarillo dorado */
+}
+
+.navbar a:hover {
+    color: #a3e635; /* Efecto dorado al pasar el cursor */
+}
+
+.nav-left,
+.nav-center,
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+/* About section styles */
+.about-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Centrado vertical */
+    flex-wrap: wrap;
+    padding: 20px 40px;
+    flex: 1; /* Para ocupar todo el espacio */
+}
+
+.about-text {
+    max-width: 40%;
+    text-align: left;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.about-images {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 50%;
+    justify-items: center;
+}
+
+.about-images img {
+    border-radius: 10px;
+    width: 100%;
+    max-width: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    border: 2px solid #fff; /* Borde blanco para las imágenes */
+}
+
+/* Imagen mientras carga */
+.about-images img:empty {
+    background-color: #ccc;
+    text-align: center;
+    line-height: 300px;
+    color: #666;
+}

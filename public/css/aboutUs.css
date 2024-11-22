@@ -1,0 +1,115 @@
+/* General styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    background-color: #1e293b;
+}
+/* Layout */
+.layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 20%;
+    background-color: #0f172a;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.profile {
+    text-align: center;
+}
+
+.profile-pic {
+    width: 60px;
+    height: 60px;
+    background-color: #334155;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+}
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu li {
+    padding: 10px 0;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.menu li:hover {
+    background-color: #1e293b;
+    color: #a3e635;
+    border-radius: 8px;
+}
+
+.footer {
+    font-size: 12px;
+    text-align: center;
+}
+/* Main Content */
+.main-content {
+    flex-grow: 1;
+    padding: 40px;
+    background: linear-gradient(135deg, #1e293b, #334155);
+    overflow-y: auto;
+}
+
+.main-content h1 {
+    font-size: 36px;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #a3e635;
+}
+
+/* About Cards Section */
+.about-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+    gap: 20px; /* Espacio entre las tarjetas */
+    justify-items: center; /* Centrar las tarjetas */
+}
+
+.card {
+    background-color: #0f172a;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%; /* Ocupa el 90% del espacio que le corresponde */
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.card .profile-pic {
+    width: 100px; /* Incrementar tamaño del avatar */
+    height: 100px;
+    background-color: #334155;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+}
+
+.card h2 {
+    font-size: 20px; /* Aumentar tamaño de texto */
+    color: #a3e635;
+    margin: 10px 0;
+}
+
+.card p {
+    font-size: 16px; /* Aumentar tamaño del texto */
+    color: #94a3b8;
+}

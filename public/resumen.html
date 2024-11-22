@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viridis Lumen</title>
+    <link rel="stylesheet" href="css/resumen.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="profile">
+                <div class="profile-pic"></div>
+                <h2>Viridis Lumen</h2>
+            </div>
+            <nav class="menu">
+                <ul>
+                    <li>Resumen</li>
+                    <li>Ahorro</li>
+                    <li>Temperatura</li>
+                    <li>Focos</li>
+                </ul>
+            </nav>
+            <div class="footer">
+                <p>Logout</p>
+                <p>About us</p>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="card">
+                    <h3>Temperatura</h3>
+                    <p>28°C</p>
+                </div>
+                <div class="card">
+                    <h3>Humedad</h3>
+                    <p>66%</p>
+                </div>
+                <div class="card">
+                    <h3>Consumo Energético</h3>
+                    <p>550W</p>
+                </div>
+            </header>
+            <section class="rooms">
+                <h3>Habitaciones</h3>
+                <div class="room-cards">
+                    <div class="room-card">
+                        <h4>Habitación 1</h4>
+                        <p>22°C</p>
+                        <p>0 Luces</p>
+                        <p>2 Personas</p>
+                    </div>
+                    <div class="room-card">
+                        <h4>Habitación 2</h4>
+                        <p>30°C</p>
+                        <p>5 Luces</p>
+                        <p>0 Personas</p>
+                    </div>
+                    <div class="room-card add-room">
+                        <p>+</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
+<script>
+    const userId = 1; // ID del usuario actual (puedes reemplazarlo dinámicamente si es necesario)
+
+    // Selección del contenedor donde se mostrarán las tarjetas
+    const roomCardsContainer = document.querySelector('.room-cards');
+
+    // Realizar la petición al backend
+    fetch(`/resumen?user_id=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Datos recibidos del backend:", data); // Depuración
+
+            // Limpiar el contenedor actual antes de añadir nuevas tarjetas
+            roomCardsContainer.innerHTML = '';
+
+            // Crear tarjetas para cada habitación
+            data.forEach(room => {
+                const roomCard = document.createElement('div');
+                roomCard.classList.add('room-card');
+
+                // Manejar valores nulos o indefinidos con un texto por defecto
+                const temperature = room.temperature !== null ? `${room.temperature}°C` : 'N/A';
+                const activeLights = room.active_lights !== null ? room.active_lights : 0;
+
+                roomCard.innerHTML = `
+                    <h4>${room.room_name}</h4>
+                    <p>Temperatura: ${temperature}</p>
+                    <p>Luces activas: ${activeLights}</p>
+                `;
+
+                // Añadir la tarjeta al contenedor
+                roomCardsContainer.appendChild(roomCard);
+            });
+
+            // Añadir una tarjeta para "Añadir nueva habitación"
+            const addRoomCard = document.createElement('div');
+            addRoomCard.classList.add('room-card', 'add-room');
+            addRoomCard.innerHTML = '<p>+</p>';
+            roomCardsContainer.appendChild(addRoomCard);
+        })
+        .catch(error => {
+            console.error("Error al obtener los datos:", error);
+
+            // Mostrar un mensaje de error en el contenedor
+            roomCardsContainer.innerHTML = `
+                <p>Error al cargar las habitaciones. Por favor, inténtalo más tarde.</p>
+            `;
+        });
+</script>
