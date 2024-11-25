@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viridis Lumen - Histórico de Datos</title>
+    <link rel="stylesheet" href="./css/histórico.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Barra lateral -->
+        <div class="sidebar">
+            <div class="profile">
+                <div class="profile-pic"></div>
+                <h1>Viridis Lumen</h1>
+            </div>
+            <div class="menu">
+                <ul>
+                    <li>Resumen</li>
+                    <li>Ahorro</li>
+                    <li>Temperatura</li>
+                    <li>Focos</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <p>Logout</p>
+                <p>About us</p>
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <h1>Histórico de Datos</h1>
+            <!-- Contenedor dinámico para las gráficas -->
+            <div id="chart-container" class="chart-container"></div>
+        </div>
+    </div>
+
+    <!-- Script para manejar las gráficas -->
+    
+</body>
+</html>
+<script >
+
+async function fetchHistoricalData() {
+    const response = await fetch('/historicalData');
+    const data = await response.json();
+    return data;
+}
+
+fetchHistoricalData().then(data => {
+    const chartContainer = document.getElementById('chart-container');
+
+    // Crear gráficos dinámicos para temperatura (tiempo vs. temperatura)
+    const temperatureData = data.temperatureReadings.reduce((acc, reading) => {
+        if (!acc[reading.room]) acc[reading.room] = { labels: [], data: [] };
+        acc[reading.room].labels.push(reading.timestamp);
+        acc[reading.room].data.push(reading.temperature);
+        return acc;
+    }, {});
+
+    Object.keys(temperatureData).forEach(room => {
+        const canvas = document.createElement('canvas');
+        canvas.classList.add('chart');
+        chartContainer.appendChild(canvas);
+
+        new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: temperatureData[room].labels,
+                datasets: [{
+                    label: `Temperatura en ${room} (°C)`,
+                    data: temperatureData[room].data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { title: { display: true, text: 'Tiempo' } },
+                    y: { title: { display: true, text: 'Temperatura (°C)' } }
+                }
+            }
+        });
+    });
+
+    // Crear gráficos dinámicos para movimiento (tiempo vs. ocurrencia)
+    const motionData = data.motionReadings.reduce((acc, reading) => {
+        if (!acc[reading.room]) acc[reading.room] = { labels: [], data: [] };
+        acc[reading.room].labels.push(reading.timestamp);
+        acc[reading.room].data.push(reading.movement);
+        return acc;
+    }, {});
+
+    Object.keys(motionData).forEach(room => {
+        const canvas = document.createElement('canvas');
+        canvas.classList.add('chart');
+        chartContainer.appendChild(canvas);
+
+        new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: motionData[room].labels,
+                datasets: [{
+                    label: `Movimiento en ${room}`,
+                    data: motionData[room].data,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { title: { display: true, text: 'Tiempo' } },
+                    y: { title: { display: true, text: 'Detección de Movimiento' } }
+                }
+            }
+        });
+    });
+
+    // Gráfica de dispositivos (dispositivos por habitación)
+    const deviceCanvas = document.createElement('canvas');
+    deviceCanvas.classList.add('chart');
+    chartContainer.appendChild(deviceCanvas);
+
+    new Chart(deviceCanvas.getContext('2d'), {
+        type: 'pie',
+        data: {
+            labels: data.rooms,
+            datasets: [{
+                label: 'Dispositivos por Habitación',
+                data: data.devices,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 99, 132, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+});
+
+</script>
