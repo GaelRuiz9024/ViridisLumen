@@ -101,67 +101,87 @@
     </div>
 
     <script>
-        const socket = new WebSocket('ws://localhost:3000');
+const socket = new WebSocket('ws://localhost:3000');
+let currentRoom = null; // Habitación seleccionada
         let sensorData = {};
-        let deviceSettings = {};
-    
+        let deviceStatus = {};
+
+        const roomDeviceMap = {
+            livingRoom: [
+                { device_id: 1, name: 'Lámpara 1' },
+                { device_id: 2, name: 'Ventilador' }
+            ],
+            bedroom: [
+                { device_id: 3, name: 'Televisor' },
+                { device_id: 4, name: 'Calefacción' }
+            ]
+        };
+
         // Conexión al WebSocket
         socket.onopen = () => {
             console.log('Conectado al WebSocket');
+            socket.send('getLatestData');
         };
-    
-        socket.onmessage = (event) => {
+
+        socket.onmessage = event => {
+            
             const data = JSON.parse(event.data);
-            console.log("Datos recibidos del servidor:", data);
-    
-            // Actualiza los datos locales según el tópico
-            if (data.topic === 'deviceSettings') {
-                deviceSettings = data.payload;
-            } else if (data.topic === 'sensorReadings') {
-                sensorData = data.payload;
+            
+
+            console.log("Datos recibidos del servidor:", data); // Verifica los datos recibidos
+
+            sensorData = data.sensorData;
+            deviceStatus = data.deviceStatus;
+
+            if (currentRoom) {
+                updateRoomData(currentRoom);
             }
-    
-            // Actualiza la interfaz con los datos
-            updateDashboard();
         };
-    
-        // Actualizar la interfaz del dashboard
-        function updateDashboard() {
-            // Actualizar los valores del header
-            const header = document.getElementById('header-sensor-values');
-            header.innerHTML = `
-                <div class="card">
-                    <h3>Temperatura</h3>
-                    <p>${sensorData.temperature || 'N/A'}°C</p>
-                </div>
-                <div class="card">
-                    <h3>Luz</h3>
-                    <p>${sensorData.light || 'N/A'} lm</p>
-                </div>
-                <div class="card">
-                    <h3>Consumo Energético</h3>
-                    <p>${sensorData.energy || 'N/A'} W</p>
-                </div>
-            `;
-    
-            // Actualizar los controles de dispositivos
-            const controls = document.getElementById('device-controls');
-            controls.innerHTML = Object.keys(deviceSettings).map(deviceId => `
-                <div class="card">
-                    <h4>Dispositivo ${deviceId}</h4>
-                    <p>Estado: ${deviceSettings[deviceId] ? 'Encendido' : 'Apagado'}</p>
-                    <button onclick="toggleDevice('${deviceId}')">Cambiar Estado</button>
-                </div>
-            `).join('');
+
+        // Función para obtener dispositivos de una habitación
+        function getDevicesByRoom(roomId) {
+            return roomDeviceMap[roomId] || [];
         }
-    
-        // Alternar el estado de un dispositivo
+
+        // Función para actualizar las tarjetas de una habitación
+        function updateRoomData(roomId) {
+            const roomDevices = getDevicesByRoom(roomId);
+
+            // Actualizar las tarjetas del header
+            document.querySelector('#header-sensor-values').innerHTML = roomDevices
+                .filter(device => sensorData[device.device_id] !== undefined)
+                .map(device => `
+                    <div class="header-card">
+                        <h3>${device.name}</h3>
+                        <p>Valor: ${sensorData[device.device_id]}</p>
+                    </div>
+                `).join('');
+
+            // Actualizar las tarjetas de controles
+            document.querySelector('#device-controls').innerHTML = roomDevices
+                .filter(device => deviceStatus[device.device_id] !== undefined)
+                .map(device => `
+                    <div class="control-card">
+                        <h3>${device.name}</h3>
+                        <p>Estado: ${deviceStatus[device.device_id] ? 'Encendido' : 'Apagado'}</p>
+                        <button onclick="toggleDevice(${device.device_id})">Cambiar Estado</button>
+                    </div>
+                `).join('');
+        }
+
+        // Lógica para cambiar la habitación seleccionada
+        document.querySelectorAll('.room-card').forEach(card => {
+            card.addEventListener('click', () => {
+                currentRoom = card.dataset.roomId;
+                updateRoomData(currentRoom);
+            });
+        });
+
+        // Función para alternar el estado de un dispositivo
         function toggleDevice(deviceId) {
             console.log(`Alternar estado para dispositivo ${deviceId}`);
-            // Aquí podrías implementar la lógica para enviar comandos al servidor
+            // Aquí puedes implementar la lógica para enviar un comando al servidor
         }
     </script>
-    
-    
 </body>
 </html>

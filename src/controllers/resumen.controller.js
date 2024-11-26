@@ -11,7 +11,7 @@ const getResumen = async (req, res) => {
         FROM Locations l
         LEFT JOIN Devices d ON l.location_id = d.location_id
         LEFT JOIN SensorReadings sr ON d.device_id = sr.device_id
-        LEFT JOIN LightSettings ls ON d.device_id = ls.device_id
+        LEFT JOIN DeviceSettings ls ON d.device_id = ls.device_id
         WHERE l.user_id = ?
         GROUP BY l.location_id, l.location_name;
     `;

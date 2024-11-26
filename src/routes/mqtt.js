@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const {getMqtt} = require('../controllers/mqtt.controller');
+const { postDeviceSettings, postSensorReadings } = require('../controllers/mqtt.controller');
 
-// Ruta de ejemplo
-router.get('/mqtt', getMqtt);
+// Define las rutas
+router.post('/deviceSettings', postDeviceSettings);
+router.post('/sensorReadings', postSensorReadings);
 
 module.exports = router;

@@ -1,9 +1,6 @@
 const connection = require('../helpers/mysql-config');
 
-
 const getHistoricalData = async (req, res) => {
-
-
     try {
         // Consultar datos de temperatura con timestamp
         const [temperatureReadings] = await connection.query(`
@@ -25,12 +22,23 @@ const getHistoricalData = async (req, res) => {
             ORDER BY sr.timestamp
         `);
 
-        // Consultar número de dispositivos por habitación
+        // Consultar suma de dispositivos activos por habitación
         const [deviceResults] = await connection.query(`
-            SELECT l.location_name AS room, COUNT(*) AS total_devices
-            FROM Devices d
-            INNER JOIN Locations l ON d.location_id = l.location_id
-            GROUP BY l.location_name
+            SELECT 
+                l.location_name AS room, 
+                SUM(ds.status) AS total_active_devices
+            FROM 
+                DeviceSettings ds
+            INNER JOIN 
+                Devices d ON ds.device_id = d.device_id
+            INNER JOIN 
+                Locations l ON d.location_id = l.location_id
+            WHERE 
+                d.device_type IN ('light', 'fan') -- Excluir sensores
+            GROUP BY 
+                l.location_name
+            ORDER BY 
+                total_active_devices DESC
         `);
 
         res.json({
@@ -44,14 +52,13 @@ const getHistoricalData = async (req, res) => {
                 timestamp: row.timestamp,
                 movement: row.movement
             })),
-            devices: deviceResults.map(row => row.total_devices),
+            devices: deviceResults.map(row => row.total_active_devices),
             rooms: deviceResults.map(row => row.room)
         });
     } catch (err) {
         console.error('Error al obtener datos históricos:', err);
         res.status(500).send('Error en el servidor');
-    } finally {
-        await connection.end();
     }
 };
+
 module.exports = { getHistoricalData };

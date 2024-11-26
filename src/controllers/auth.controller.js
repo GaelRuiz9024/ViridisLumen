@@ -1,18 +1,6 @@
 const db = require('../helpers/mysql-config');
 
-// Mostrar dashboard solo si está autenticado
-exports.dashboard = async (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/login.html'); // Redirige al login si no hay usuario en sesión
-    }
 
-    res.send(`
-        <h1>Bienvenido ${req.session.user.username}</h1>
-        <p>Este es tu panel de control.</p>
-        <p>Tu ID de usuario es: ${req.session.user.id}</p>  <!-- Muestra el ID de usuario -->
-        <a href="/logout">Cerrar sesión</a>
-    `);
-};
 
 // Iniciar sesión
 exports.login = async (req, res) => {
@@ -28,7 +16,7 @@ exports.login = async (req, res) => {
                 id: rows[0].id,
                 username: rows[0].username
             };
-            res.redirect('/dashboard');
+            res.redirect('/main.html');
         } else {
             res.redirect('/login.html?error=Usuario o contraseña incorrectos'); // Pasar mensaje de error
         }

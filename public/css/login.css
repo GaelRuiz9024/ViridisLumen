@@ -10,6 +10,22 @@ body {
     color: #fff;
 }
 
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden; /* Asegura que la imagen no salga del contenedor circular */
+    margin: 0 auto 10px;
+    background-color: #334155; /* Fondo visible si no hay imagen */
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ajusta la imagen sin distorsionarla */
+    display: block; /* Evita espacios extra alrededor de la imagen */
+}
+
 /* Contenedor transparente */
 .login-container {
     background: rgba(255, 255, 255, 0.1); /* Transparencia */

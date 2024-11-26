@@ -1,13 +1,8 @@
-const express = require('express');
-const router = express.Router();
-
-
-
 const db = require('../helpers/mysql-config');
 
 // Ruta para insertar múltiples configuraciones de dispositivos
-router.post('/deviceSettings', (req, res) => {
-    const devices = req.body; // Un JSON con el estado de todos los dispositivos
+const postDeviceSettings = async (req, res) => {
+    const devices = req.body;
 
     if (!Array.isArray(devices)) {
         return res.status(400).json({ error: 'Se esperaba un arreglo de configuraciones' });
@@ -27,11 +22,11 @@ router.post('/deviceSettings', (req, res) => {
         }
         res.status(201).json({ message: 'Datos insertados en DeviceSettings', rowsAffected: result.affectedRows });
     });
-});
+};
 
 // Ruta para insertar múltiples lecturas de sensores
-router.post('/sensorReadings', (req, res) => {
-    const readings = req.body; // Un JSON con todas las lecturas de sensores
+const postSensorReadings = async (req, res) => {
+    const readings = req.body;
 
     if (!Array.isArray(readings)) {
         return res.status(400).json({ error: 'Se esperaba un arreglo de lecturas de sensores' });
@@ -51,6 +46,9 @@ router.post('/sensorReadings', (req, res) => {
         }
         res.status(201).json({ message: 'Datos insertados en SensorReadings', rowsAffected: result.affectedRows });
     });
-});
+};
 
-module.exports = router;
+module.exports = {
+    postDeviceSettings,
+    postSensorReadings,
+};

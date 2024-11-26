@@ -59,28 +59,22 @@ mqttClient.on('connect', () => {
 
 // Manejo de mensajes de MQTT
 mqttClient.on('message', async (topic, message) => {
+    const payload = JSON.parse(message.toString());
+    console.log(`Mensaje recibido en ${topic}:`, payload);
+    const data = JSON.parse(message.toString());
     try {
-        const payload = JSON.parse(message.toString());
-        console.log(`Mensaje recibido en ${topic}:`, payload);
-
-        // Enviar datos a través de WebSocket
-        wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({ topic, payload }));
-            }
-        });
-
-        // Opcional: Guardar en el backend si es necesario
         if (topic === topicDeviceSettings) {
+            // Enviar datos de deviceSettings a la ruta correspondiente
             await axios.post(`http://localhost:${port}/mqtt/deviceSettings`, payload);
+            
         } else if (topic === topicSensorReadings) {
+            // Enviar datos de sensorReadings a la ruta correspondiente
             await axios.post(`http://localhost:${port}/mqtt/sensorReadings`, payload);
         }
     } catch (error) {
         console.error(`Error procesando datos de ${topic}:`, error.message);
     }
 });
-
 
 server.listen(port, () => {
     console.log(`Servidor corriendo en el puerto ${port}`);

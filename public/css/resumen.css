@@ -14,7 +14,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-    width: 20%;
+    width: 15%;
     background-color: #0f172a;
     display: flex;
     flex-direction: column;
@@ -29,11 +29,18 @@ body {
 .profile-pic {
     width: 60px;
     height: 60px;
-    background-color: #334155;
     border-radius: 50%;
+    overflow: hidden; /* Asegura que la imagen no salga del contenedor circular */
     margin: 0 auto 10px;
+    background-color: #334155; /* Fondo visible si no hay imagen */
 }
 
+.profile-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ajusta la imagen sin distorsionarla */
+    display: block; /* Evita espacios extra alrededor de la imagen */
+}
 .menu ul {
     list-style: none;
     padding: 0;
@@ -47,6 +54,15 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
+.menu li a{
+    color: #fff;
+    text-decoration: none;
+
+}
+.menu li a:hover{
+    color: #a3e635;
+}
+
 .menu li:hover {
     background-color: #1e293b;
     color: #a3e635;
@@ -56,6 +72,11 @@ body {
 .footer {
     font-size: 12px;
     text-align: center;
+}
+
+.footer a {
+    color: #fff;
+    text-decoration: none;
 }
 
 /* Main content */

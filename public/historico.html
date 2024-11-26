@@ -9,25 +9,24 @@
 </head>
 <body>
     <div class="container">
-        <!-- Barra lateral -->
-        <div class="sidebar">
+        <aside class="sidebar">
             <div class="profile">
-                <div class="profile-pic"></div>
-                <h1>Viridis Lumen</h1>
+                <div class="profile-pic">
+                    <img src="img/logo.jpg" alt="">
+                </div>
+                <h2>Viridis Lumen</h2>
             </div>
-            <div class="menu">
+            <nav class="menu">
                 <ul>
-                    <li>Resumen</li>
-                    <li>Ahorro</li>
-                    <li>Temperatura</li>
-                    <li>Focos</li>
+                    <li><a href="/resumen.html">Resumen</a></li>
+                    <li><a href="/historico.html">Histórico</a></li>
                 </ul>
-            </div>
+            </nav>
             <div class="footer">
-                <p>Logout</p>
-                <p>About us</p>
+                <p><a href="/logout">Logout</a></p>
+                <p><a href="/aboutUs.html">About us</a></p>
             </div>
-        </div>
+        </aside>
 
         <!-- Contenido principal -->
         <div class="main-content">
@@ -51,6 +50,7 @@ async function fetchHistoricalData() {
 
 fetchHistoricalData().then(data => {
     const chartContainer = document.getElementById('chart-container');
+    console.log(data); // Verifica si contiene 'devices' y 'rooms'
 
     // Crear gráficos dinámicos para temperatura (tiempo vs. temperatura)
     const temperatureData = data.temperatureReadings.reduce((acc, reading) => {
@@ -124,36 +124,48 @@ fetchHistoricalData().then(data => {
         });
     });
 
-    // Gráfica de dispositivos (dispositivos por habitación)
-    const deviceCanvas = document.createElement('canvas');
-    deviceCanvas.classList.add('chart');
-    chartContainer.appendChild(deviceCanvas);
+   // Gráfica de dispositivos activos por habitación
+const deviceCanvas = document.createElement('canvas');
+deviceCanvas.classList.add('chart');
+chartContainer.appendChild(deviceCanvas);
 
-    new Chart(deviceCanvas.getContext('2d'), {
-        type: 'pie',
-        data: {
-            labels: data.rooms,
-            datasets: [{
-                label: 'Dispositivos por Habitación',
-                data: data.devices,
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 99, 132, 0.2)',
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 99, 132, 1)',
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
+new Chart(deviceCanvas.getContext('2d'), {
+    type: 'pie',
+    data: {
+        labels: data.rooms,
+        datasets: [{
+            label: 'Dispositivos Activos por Habitación',
+            data: data.devices,
+            backgroundColor: [
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(255, 206, 86, 0.2)'
+            ],
+            borderColor: [
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 206, 86, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return `${context.label}: ${context.raw} dispositivos activos`;
+                    }
+                }
+            }
         }
-    });
+    }
+});
+
 });
 
 </script>

@@ -44,7 +44,7 @@ CREATE TABLE SensorReadings (
 CREATE TABLE DeviceSettings (
     setting_id INT AUTO_INCREMENT PRIMARY KEY,
     device_id INT,
-    status ENUM('on', 'off') DEFAULT 'off', -- Estado del dispositivo
+    status ENUM(1,0) DEFAULT 0, -- Estado del dispositivo
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (device_id) REFERENCES Devices(device_id)
 );
@@ -84,16 +84,16 @@ INSERT INTO Devices (device_identifier, device_name, device_type, location_id) V
 
 -- Configuración inicial de dispositivos en "off"
 INSERT INTO DeviceSettings (device_id, status) VALUES
-(1, 'off'), -- Ventilador
-(2, 'off'), -- Sensor de Temperatura
-(3, 'off'), -- Foco Sala
-(4, 'off'), -- Sensor de Movimiento
-(5, 'off'), -- Sensor de Luz Habitación 1
-(6, 'off'), -- Foco Habitación 1
-(7, 'off'), -- Foco Habitación 2
-(8, 'off'), -- Sensor de Luz Habitación 2
-(9, 'off'), -- Foco Habitación 3
-(10, 'off'); -- Sensor de Luz Habitación 3
+(1, 0), -- Ventilador
+(2, 0), -- Sensor de Temperatura
+(3, 0), -- Foco Sala
+(4, 0), -- Sensor de Movimiento
+(5, 0), -- Sensor de Luz Habitación 1
+(6, 0), -- Foco Habitación 1
+(7, 0), -- Foco Habitación 2
+(8, 0), -- Sensor de Luz Habitación 2
+(9, 0), -- Foco Habitación 3
+(10, 0); -- Sensor de Luz Habitación 3
 
 -- Ventilador (Estado no aplica para lecturas)
 -- Sensor de Temperatura
