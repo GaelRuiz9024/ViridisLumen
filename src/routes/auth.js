@@ -7,3 +7,7 @@ router.post('/login', login); // Ruta para el login
 router.get('/logout', logout); // Ruta para cerrar sesión
 
 module.exports = router;
+
+
+
+

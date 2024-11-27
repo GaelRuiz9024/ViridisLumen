@@ -15,6 +15,7 @@ const auth = require('./src/routes/auth');
 const historicalData = require('./src/routes/historicalData');
 const mqtti=require('./src/routes/mqtt');
 
+
 app.use(express.static('public')); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 

@@ -40,6 +40,7 @@
 </head>
 <body>
     <div class="container">
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="profile">
                 <div class="profile-pic">
@@ -58,7 +59,10 @@
                 <p><a href="/aboutUs.html">About us</a></p>
             </div>
         </aside>
-        <main class="main-content">
+
+        <!-- Main Content -->
+        <main class="main-content" id="main-content">
+            <!-- Header -->
             <header class="dashboard-header" id="header-sensor-values">
                 <div class="card">
                     <h3>Temperatura</h3>
@@ -73,95 +77,161 @@
                     <p>550W</p>
                 </div>
             </header>
+
+            <!-- Device Controls -->
             <section class="device-controls" id="device-controls">
-                <div class="card">
-                    <h4>Lámpara 1</h4>
-                    <button class="toggle-button">
-                        <span>🔌</span>
-                    </button>
-                </div>
+                <h3>Dispositivos</h3>
+                <!-- Dispositivos dinámicos -->
             </section>
+
+            <!-- Rooms -->
             <section class="rooms">
                 <h3>Habitaciones</h3>
-                <div class="room-cards">
-                    <div class="room-card" data-room-id="livingRoom">
-                        <h4>Living Room</h4>
-                        <p>¿Ocupada?: No</p>
-                    </div>
-                    <div class="room-card" data-room-id="bedroom">
-                        <h4>Bedroom</h4>
-                        <p>¿Ocupada?: Sí</p>
-                    </div>
-                    <div class="room-card add-room">
-                        <p>+</p>
-                    </div>
+                <div class="room-cards" id="room-cards">
+                    <!-- Habitaciones dinámicas -->
                 </div>
             </section>
         </main>
     </div>
-
-    <script>
-        const socket = new WebSocket('ws://localhost:3000');
-        let sensorData = {};
-        let deviceSettings = {};
-    
-        // Conexión al WebSocket
-        socket.onopen = () => {
-            console.log('Conectado al WebSocket');
-        };
-    
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log("Datos recibidos del servidor:", data);
-    
-            // Actualiza los datos locales según el tópico
-            if (data.topic === 'deviceSettings') {
-                deviceSettings = data.payload;
-            } else if (data.topic === 'sensorReadings') {
-                sensorData = data.payload;
-            }
-    
-            // Actualiza la interfaz con los datos
-            updateDashboard();
-        };
-    
-        // Actualizar la interfaz del dashboard
-        function updateDashboard() {
-            // Actualizar los valores del header
-            const header = document.getElementById('header-sensor-values');
-            header.innerHTML = `
-                <div class="card">
-                    <h3>Temperatura</h3>
-                    <p>${sensorData.temperature || 'N/A'}°C</p>
-                </div>
-                <div class="card">
-                    <h3>Luz</h3>
-                    <p>${sensorData.light || 'N/A'} lm</p>
-                </div>
-                <div class="card">
-                    <h3>Consumo Energético</h3>
-                    <p>${sensorData.energy || 'N/A'} W</p>
-                </div>
-            `;
-    
-            // Actualizar los controles de dispositivos
-            const controls = document.getElementById('device-controls');
-            controls.innerHTML = Object.keys(deviceSettings).map(deviceId => `
-                <div class="card">
-                    <h4>Dispositivo ${deviceId}</h4>
-                    <p>Estado: ${deviceSettings[deviceId] ? 'Encendido' : 'Apagado'}</p>
-                    <button onclick="toggleDevice('${deviceId}')">Cambiar Estado</button>
-                </div>
-            `).join('');
-        }
-    
-        // Alternar el estado de un dispositivo
-        function toggleDevice(deviceId) {
-            console.log(`Alternar estado para dispositivo ${deviceId}`);
-            // Aquí podrías implementar la lógica para enviar comandos al servidor
-        }
-    </script>
-    
-    
 </body>
+
 </html>
+<script>
+    const devicesMap = {}; // Caché local para dispositivos
+    const sensorsMap = {}; // Caché local para sensores
+
+    // Función para manejar mensajes MQTT
+    function handleWebSocketMessage(message) {
+        const data = JSON.parse(message.data);
+        console.log("Mensaje recibido", data);
+
+        if (data.topic === "sensorReadings") {
+            data.payload.forEach(reading => {
+                const sensor = sensorsMap[reading.device_id];
+                if (sensor) {
+                    sensor.latest_reading = reading.value;
+                    createSensorCard(sensor); // Aquí se llama correctamente
+                }
+            });
+        } else if (data.topic === "deviceSettings") {
+            data.payload.forEach(setting => {
+                const device = devicesMap[setting.device_id];
+                if (device) {
+                    device.current_status = setting.status;
+                    createDeviceCard(device); // Aquí se llama correctamente
+                }
+            });
+        }
+    }
+
+    // Establecer conexión WebSocket con reconexión automática
+    function connectWebSocket() {
+        const socket = new WebSocket("ws://localhost:3000");
+
+        socket.onopen = () => console.log("Conexión WebSocket establecida");
+
+        socket.onmessage = handleWebSocketMessage;
+
+        socket.onclose = () => {
+            console.warn("Conexión WebSocket cerrada. Reconectando en 3 segundos...");
+            setTimeout(connectWebSocket, 3000);
+        };
+
+        socket.onerror = error => console.error("Error en el WebSocket:", error);
+    }
+
+    // Cargar datos iniciales del backend
+    function loadInitialData() {
+        fetch("/resumen")
+            .then(response => response.json())
+            .then(handleDataLoad)
+            .catch(error => console.error("Error al cargar los dispositivos:", error));
+    }
+
+    // Crear o actualizar tarjetas de sensores
+    function createSensorCard(sensor) {
+        let card = document.querySelector(`#sensor-${sensor.device_id}`);
+        if (!card) {
+            card = document.createElement("div");
+            card.className = "card";
+            card.id = `sensor-${sensor.device_id}`;
+            document.getElementById("header-sensor-values").appendChild(card);
+        }
+        card.innerHTML = `
+            <h3>${sensor.device_name}</h3>
+            <p>${sensor.latest_reading || "No disponible"}</p>
+        `;
+    }
+
+    // Crear o actualizar tarjetas de dispositivos
+    function createDeviceCard(device) {
+        let card = document.querySelector(`#device-${device.device_id}`);
+        if (!card) {
+            card = document.createElement("div");
+            card.className = "card";
+            card.id = `device-${device.device_id}`;
+            document.getElementById("device-controls").appendChild(card);
+        }
+        card.innerHTML = `
+            <h3>${device.device_name}</h3>
+            <p>Estado: ${device.current_status ? "Encendido" : "Apagado"}</p>
+        `;
+    }
+
+    // Crear tarjetas de habitaciones
+    function createRoomCard(location) {
+        let card = document.createElement("div");
+        card.className = "room-card";
+        card.innerHTML = `
+            <h3>${location.location_name}</h3>
+            <p>Piso: ${location.floor}</p>
+        `;
+        document.getElementById("room-cards").appendChild(card);
+        card.addEventListener("click", () => showRoomDetails(location.location_id));
+    }
+
+    // Manejar el clic en una habitación
+    function showRoomDetails(locationId) {
+        // Filtrar dispositivos y sensores para la habitación seleccionada
+        const devices = Object.values(devicesMap).filter(d => d.location_id === locationId);
+        const sensors = Object.values(sensorsMap).filter(s => s.location_id === locationId);
+
+        // Limpiar tarjetas previas
+        clearSection("header-sensor-values");
+        clearSection("device-controls");
+
+        // Crear nuevas tarjetas
+        devices.forEach(createDeviceCard);
+        sensors.forEach(createSensorCard);
+
+        console.log("Dispositivos en la habitación:", devices);
+        console.log("Sensores en la habitación:", sensors);
+    }
+
+    // Función para limpiar una sección del DOM
+    function clearSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        while (section.firstChild) {
+            section.removeChild(section.firstChild);
+        }
+    }
+
+    // Manejar la carga inicial de datos
+    function handleDataLoad(data) {
+        data.locations.forEach(createRoomCard);
+        data.devices.forEach(device => {
+            devicesMap[device.device_id] = device;
+        });
+        data.sensors.forEach(sensor => {
+            sensorsMap[sensor.device_id] = sensor;
+        });
+
+        console.log("Datos iniciales cargados:", { devicesMap, sensorsMap });
+    }
+
+    // Inicializar aplicación
+    document.addEventListener("DOMContentLoaded", () => {
+        loadInitialData();
+        connectWebSocket();
+    });
+</script>
