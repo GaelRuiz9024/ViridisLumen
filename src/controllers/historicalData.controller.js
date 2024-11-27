@@ -63,21 +63,4 @@ const getHistoricalData = async (req, res) => {
 
 module.exports = { getHistoricalData };
 
-const connection = require('../helpers/mysql-config');
 
-const getHistoricalData = async (req, res) => {
-    try {
-        // Consultar datos de temperatura con timestamp
-        const [temperatureReadings] = await connection.query(`
-            SELECT * from Users;
-        `);
-
-   
-     
-    } catch (err) {
-        console.error('Error al obtener datos históricos:', err);
-        res.status(500).send('Error en el servidor');
-    }
-};
-
-module.exports = { getHistoricalData };
