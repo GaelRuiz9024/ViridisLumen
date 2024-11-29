@@ -40,7 +40,7 @@
 
     <script>
         // Llama a la API para obtener los datos
-        fetch('/resumen')
+        fetch('http://servidor-iot-gael.us-east-1.elasticbeanstalk.com//resumen')
             .then(response => response.json())
             .then(data => {
                 const tableBody = document.querySelector('#userTable tbody');

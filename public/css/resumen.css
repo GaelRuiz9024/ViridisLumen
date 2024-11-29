@@ -5,6 +5,12 @@ body {
     color: #fff;
     background-color: #1e293b;
 }
+.dashboard-header,
+.device-controls {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+}
 
 /* Container */
 .container {
@@ -81,11 +87,10 @@ body {
 
 /* Main content */
 .main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 20px;
+    width: 80%;
+    padding: 15px;
+    margin: auto;
+    position: relative;
 }
 
 .dashboard-header {
@@ -139,13 +144,30 @@ body {
 
 .room-card {
     background-color: #334155;
-    border-radius: 8px;
+    border-radius: 100px; /* Aumentar para mayor redondez */
     padding: 20px;
     text-align: center;
     flex: 1;
     max-width: 30%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     min-width: 150px;
+    cursor: pointer; /* Indicar que son botones */
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.room-card:hover {
+    transform: scale(1.05); /* Aumentar ligeramente al pasar el ratón */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    background-color: #a3e635;
+    color:white;
+}
+.room-card:hover h3{
+    color:white;
+}
+
+.room-card.selected {
+    border: 2px solid #a3e635; /* Borde verde para la habitación seleccionada */
+    background-color: #1e293b; /* Fondo más oscuro para distinguir */
 }
 
 .room-card h4 {
@@ -165,4 +187,38 @@ body {
 
 .room-card.add-room:hover {
     background-color: #1e293b;
+}
+.selected-room-label {
+    position: absolute;
+    top: 15px;
+    left: 20%;
+    background-color: #334155;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    z-index: 10;
+}
+.device-controls .card {
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.device-controls .card.green {
+    border-color: #000100;
+    color: white;
+}
+
+
+.room-card.selected {
+    border-color: #a3e635;
+    border-width: 5px;
+    background-color: #222b37;
+}
+
+.room-card.add-room {
+    font-size: 2rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

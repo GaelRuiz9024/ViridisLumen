@@ -16,9 +16,9 @@ exports.login = async (req, res) => {
                 id: rows[0].id,
                 username: rows[0].username
             };
-            res.redirect('/main.html');
+            res.redirect('http://viridis-lumen.s3-website-us-east-1.amazonaws.com/main.html');
         } else {
-            res.redirect('/login.html?error=Usuario o contraseña incorrectos'); // Pasar mensaje de error
+            res.redirect('http://viridis-lumen.s3-website-us-east-1.amazonaws.com//login.html?error=Usuario o contraseña incorrectos'); // Pasar mensaje de error
         }
     } catch (err) {
         console.error(err);
@@ -29,6 +29,14 @@ exports.login = async (req, res) => {
 // Cerrar sesión
 exports.logout = (req, res) => {
     req.session.destroy(() => {
-        res.redirect('/login.html');
+        res.redirect('http://viridis-lumen.s3-website-us-east-1.amazonaws.com//login.html');
     });
+};
+// Verificar si hay una sesión activa
+exports.verifySession = (req, res) => {
+    if (req.session && req.session.user) {
+        res.status(200).json({ user_id: req.session.user.id });
+    } else {
+        res.status(401).json({ error: "No hay una sesión activa" });
+    }
 };

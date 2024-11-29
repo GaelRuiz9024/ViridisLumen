@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viridis Lumen - Histórico de Datos</title>
-    <link rel="stylesheet" href="./css/histórico.css">
+    <link rel="stylesheet" href="css/histórico.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -23,8 +23,8 @@
                 </ul>
             </nav>
             <div class="footer">
-                <p><a href="/logout">Logout</a></p>
-                <p><a href="/aboutUs.html">About us</a></p>
+                <p><a href="/logout">Cerrar sesión</a></p>
+                <p><a href="/aboutUs.html">Sobre nosotros</a></p>
             </div>
         </aside>
 
@@ -50,7 +50,6 @@ async function fetchHistoricalData() {
 
 fetchHistoricalData().then(data => {
     const chartContainer = document.getElementById('chart-container');
-    console.log(data); // Verifica si contiene 'devices' y 'rooms'
 
     // Crear gráficos dinámicos para temperatura (tiempo vs. temperatura)
     const temperatureData = data.temperatureReadings.reduce((acc, reading) => {
@@ -81,11 +80,28 @@ fetchHistoricalData().then(data => {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { title: { display: true, text: 'Tiempo' } },
-                    y: { title: { display: true, text: 'Temperatura (°C)' } }
+                    x: {
+                        title: { display: true, text: 'Tiempo' },
+                        ticks: {
+                            callback: function(value) {
+                                // `this.getLabelForValue(value)` obtiene el valor original de la etiqueta
+                                const originalDate = this.getLabelForValue(value);
+                                const date = new Date(originalDate); // Convierte el valor original en un objeto Date
+                                // Extraer las horas y minutos manualmente
+                                const hours = date.getUTCHours().toString().padStart(2, '0'); // Usar UTC explícitamente
+                                const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+
+                                // Retornar en formato HH:mm
+                                return `${hours}:${minutes}`;
+                            }
+                        }
+                    },
+                    y: { title: { display: true, text: 'Temperatura (°C)' } } // Ajusta para tu eje Y
                 }
+
             }
         });
+
     });
 
     // Crear gráficos dinámicos para movimiento (tiempo vs. ocurrencia)
@@ -117,7 +133,22 @@ fetchHistoricalData().then(data => {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { title: { display: true, text: 'Tiempo' } },
+                    x: {
+                        title: { display: true, text: 'Tiempo' },
+                        ticks: {
+                            callback: function(value) {
+                                // `this.getLabelForValue(value)` obtiene el valor original de la etiqueta
+                                const originalDate = this.getLabelForValue(value);
+                                const date = new Date(originalDate); // Convierte el valor original en un objeto Date
+                                // Extraer las horas y minutos manualmente
+                                const hours = date.getUTCHours().toString().padStart(2, '0'); // Usar UTC explícitamente
+                                const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+
+                                // Retornar en formato HH:mm
+                                return `${hours}:${minutes}`;
+                            }
+                        }
+                    },
                     y: { title: { display: true, text: 'Detección de Movimiento' } }
                 }
             }

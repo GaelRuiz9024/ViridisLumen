@@ -3,6 +3,7 @@ const session = require('express-session');
 const http = require('http');
 const WebSocket = require('ws');
 const mqtt = require('mqtt');
+const cors = require('cors')
 const axios = require('axios');
 require('dotenv').config();
 
@@ -14,7 +15,11 @@ const resumen = require('./src/routes/resumen');
 const auth = require('./src/routes/auth');
 const historicalData = require('./src/routes/historicalData');
 const mqtti=require('./src/routes/mqtt');
-
+app.use(cors(
+    {origin:'http://viridis-lumen.s3-website-us-east-1.amazonaws.com/',
+    credentials: true // Esto permite el envío de cookies
+    }
+))
 app.use(express.static('public')); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
@@ -23,6 +28,11 @@ app.use(
         secret: 'simple_secret',
         resave: false,
         saveUninitialized: true,
+        cookie: {
+            httpOnly: true,
+            secure: true, // Habilítalo si usas HTTPS
+            sameSite: 'None' // Esto permite que las cookies se compartan entre dominios
+        }
     })
 );
 
@@ -63,12 +73,6 @@ mqttClient.on('message', async (topic, message) => {
         const payload = JSON.parse(message.toString());
         console.log(`Mensaje recibido en ${topic}:`, payload);
 
-        // Enviar datos a través de WebSocket
-        wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({ topic, payload }));
-            }
-        });
 
         // Opcional: Guardar en el backend si es necesario
         if (topic === topicDeviceSettings) {
