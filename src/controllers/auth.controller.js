@@ -2,7 +2,6 @@ const db = require('../helpers/mysql-config');
 
 
 
-// Iniciar sesión
 exports.login = async (req, res) => {
     const { username, password } = req.body;
 
@@ -16,9 +15,10 @@ exports.login = async (req, res) => {
                 id: rows[0].id,
                 username: rows[0].username
             };
+            console.log("Sesión iniciada:", req.session.user); // Verifica que el usuario esté almacenado
             res.redirect('http://viridis-lumen.s3-website-us-east-1.amazonaws.com/main.html');
         } else {
-            res.redirect('http://viridis-lumen.s3-website-us-east-1.amazonaws.com//login.html?error=Usuario o contraseña incorrectos'); // Pasar mensaje de error
+            res.redirect('http://viridis-lumen.s3-website-us-east-1.amazonaws.com/login.html?error=Usuario o contraseña incorrectos');
         }
     } catch (err) {
         console.error(err);
@@ -26,10 +26,11 @@ exports.login = async (req, res) => {
     }
 };
 
+
 // Cerrar sesión
 exports.logout = (req, res) => {
     req.session.destroy(() => {
-        res.redirect('http://viridis-lumen.s3-website-us-east-1.amazonaws.com//login.html');
+        res.redirect('http://viridis-lumen.s3-website-us-east-1.amazonaws.com/login.html');
     });
 };
 // Verificar si hay una sesión activa

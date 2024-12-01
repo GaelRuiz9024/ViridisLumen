@@ -15,11 +15,7 @@ const resumen = require('./src/routes/resumen');
 const auth = require('./src/routes/auth');
 const historicalData = require('./src/routes/historicalData');
 const mqtti=require('./src/routes/mqtt');
-app.use(cors(
-    {origin:'http://viridis-lumen.s3-website-us-east-1.amazonaws.com/',
-    credentials: true // Esto permite el envío de cookies
-    }
-))
+app.use(cors())
 app.use(express.static('public')); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
@@ -28,13 +24,13 @@ app.use(
         secret: 'simple_secret',
         resave: false,
         saveUninitialized: true,
-        cookie: {
-            httpOnly: true,
-            secure: true, // Habilítalo si usas HTTPS
-            sameSite: 'None' // Esto permite que las cookies se compartan entre dominios
-        }
     })
 );
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*'); // Permite todos los orígenes
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
 
 app.use('/', auth);
 app.use('/', resumen);
@@ -76,9 +72,9 @@ mqttClient.on('message', async (topic, message) => {
 
         // Opcional: Guardar en el backend si es necesario
         if (topic === topicDeviceSettings) {
-            await axios.post(`http://localhost:${port}/mqtt/deviceSettings`, payload);
+            await axios.post(`http://servidor-iot-gael.us-east-1.elasticbeanstalk.com:${port}/mqtt/deviceSettings`, payload);
         } else if (topic === topicSensorReadings) {
-            await axios.post(`http://localhost:${port}/mqtt/sensorReadings`, payload);
+            await axios.post(`http://servidor-iot-gael.us-east-1.elasticbeanstalk.com:${port}/mqtt/sensorReadings`, payload);
         }
     } catch (error) {
         console.error(`Error procesando datos de ${topic}:`, error.message);

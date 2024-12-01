@@ -24,7 +24,7 @@
                 </ul>
             </nav>
             <div class="footer">
-                <p><a href="/logout">Cerrar sesión</a></p>
+                <p><a href="http://servidor-iot-gael.us-east-1.elasticbeanstalk.com/logout">Cerrar sesión</a></p>
                 <p><a href="/aboutUs.html">Sobre nosotros</a></p>
             </div>
         </aside>
@@ -58,6 +58,8 @@
     <script>
         const devicesMap = {};
         const sensorsMap = {};
+        let activeRoomId = null; // Variable para almacenar la habitación activa
+
         const brokerUrl = "ws://52.7.173.18:8080"; // URL del broker con WebSocket
         const topics = ["sensorReadings", "deviceSettings"]; // Tópicos a suscribirse
 
@@ -73,23 +75,85 @@
             });
         });
 
-        client.on('message', (topic, message) => {
-            const payload = JSON.parse(message.toString());
-            if (topic === "sensorReadings") handleSensorReadings(payload);
-            else if (topic === "deviceSettings") handleDeviceSettings(payload);
+        client.on('message', async (topic, message) => {
+            try {
+                const payload = JSON.parse(message.toString());
+                 // Muestra el tópico y el contenido del mensaje
+                console.log(`Tópico recibido: ${topic}`);
+                console.log(`Contenido del mensaje:`, payload);
+
+                // Enviar datos al servidor usando fetch según el topic
+                let url;
+                if (topic === "deviceSettings") {
+                    url = `http://servidor-iot-gael.us-east-1.elasticbeanstalk.com/mqtt/deviceSettings`;
+                    handleDeviceSettings(payload);  // Llamas la función que maneja la lógica específica para deviceSettings
+                    sendToServer(url, payload); // Llama a la función que hace el POST
+
+                } else if (topic === "sensorReadings") {
+                    url = `http://servidor-iot-gael.us-east-1.elasticbeanstalk.com/mqtt/sensorReadings`;
+                    handleSensorReadings(payload); // Llamas la función que maneja la lógica específica para sensorReadings
+
+                    sendToServer(url, payload); // Llama a la función que hace el POST
+                }
+            } catch (error) {
+                console.error("Error al manejar el mensaje MQTT o enviar los datos:", error);
+            }
         });
+
+        // Función para enviar datos al servidor con fetch
+        async function sendToServer(url, payload) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        
+                    },
+                    body: JSON.stringify(payload),
+                    mode: 'cors'
+                });
+
+                
+                if (response.ok) {
+                    console.log(`Datos enviados a ${url}:`, payload);
+                } else {
+                    console.error('Error al enviar los datos:', response.statusText);
+                }
+            } catch (error) {
+                console.error("Error al enviar los datos al servidor:", error);
+            }
+        }
+
 
         client.on('error', err => console.error('Error en MQTT:', err));
 
         function handleSensorReadings(payload) {
             payload.forEach(reading => {
                 const sensor = sensorsMap[reading.device_id];
-                if (sensor) {
+                if (sensor.location_id === activeRoomId) {
                     sensor.latest_reading = reading.value;
-                    createSensorCard(sensor);
+                    updateSensorCard(sensor); // Actualiza o crea la tarjeta
                 }
             });
         }
+
+        function updateSensorCard(sensor) {
+            // Busca una tarjeta existente por ID
+            let card = document.querySelector(`#sensor-${sensor.device_id}`);
+            if (!card) {
+                // Si no existe, crea una nueva
+                card = document.createElement("div");
+                card.className = "card";
+                card.id = `sensor-${sensor.device_id}`;
+                document.getElementById("header-sensor-values").appendChild(card);
+            }
+            // Actualiza el contenido de la tarjeta
+            card.innerHTML = `
+                <h3>${sensor.device_name}</h3>
+                <p>${sensor.latest_reading || "No disponible"}</p>
+            `;
+        }
+
 
         function clearSection(sectionId) {
             const section = document.getElementById(sectionId);
@@ -101,22 +165,53 @@
         function handleDeviceSettings(payload) {
             payload.forEach(setting => {
                 const device = devicesMap[setting.device_id];
-                if (device) {
+                if (device && device.location_id === activeRoomId) {
                     device.current_status = setting.status;
-                    createDeviceCard(device);
+                    updateDeviceCard(device); // Actualiza o crea la tarjeta
                 }
             });
         }
 
-        function loadInitialData() {
-            fetch("http://servidor-iot-gael.us-east-1.elasticbeanstalk.com/resumen")
-                .then(response => response.json())
-                .then(data => {
-                    data.locations.forEach(createRoomCard);
-                    data.devices.forEach(device => devicesMap[device.device_id] = device);
-                    data.sensors.forEach(sensor => sensorsMap[sensor.device_id] = sensor);
-                })
-                .catch(error => console.error("Error al cargar datos:", error));
+        function updateDeviceCard(device) {
+            let card = document.querySelector(`#device-${device.device_id}`);
+            if (!card) {
+                // Si no existe, crea una nueva
+                card = document.createElement("div");
+                card.className = "card";
+                card.id = `device-${device.device_id}`;
+                document.getElementById("device-controls").appendChild(card);
+            }
+            // Actualiza el contenido de la tarjeta
+            card.innerHTML = `
+                <h3>${device.device_name}</h3>
+                <p>${device.current_status ? "Encendido" : "Apagado"}</p>
+            `;
+        }
+
+        function loadInitialData(userId) {
+            fetch(`http://servidor-iot-gael.us-east-1.elasticbeanstalk.com/resumen?user_id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                data.locations.forEach(createRoomCard);
+                data.devices.forEach(device => {
+                    devicesMap[device.device_id] = device;
+                    createDeviceCard(device); // Crear tarjeta desde el inicio con ID correcto
+                });
+                data.sensors.forEach(sensor => {
+                    sensorsMap[sensor.device_id] = sensor;
+                    createSensorCard(sensor); // Crear tarjeta desde el inicio con ID correcto
+                });
+
+                       // Seleccionar automáticamente la primera habitación
+                if (data.locations.length > 0) {
+                    const firstLocation = data.locations[0];
+                    const firstCard = document.querySelector(".room-card"); // Seleccionar la primera tarjeta
+                    if (firstCard) {
+                        selectRoom(firstCard, firstLocation.location_id); // Llamar selectRoom con la primera habitación
+                    }
+                }
+            })
+            .catch(error => console.error("Error al cargar datos:", error));
         }
 
         function createRoomCard(location) {
@@ -135,6 +230,8 @@
 
             selectedRoomLabel.textContent = card.querySelector("h3").textContent;
 
+            activeRoomId = locationId;
+            
             clearSection("header-sensor-values");
             clearSection("device-controls");
 
@@ -146,14 +243,20 @@
         }
 
         function createSensorCard(sensor) {
-            const card = document.createElement("div");
-            card.className = "card";
+            // Aseguramos que siempre se genere con un ID
+            let card = document.querySelector(`#sensor-${sensor.device_id}`);
+            if (!card) {
+                card = document.createElement("div");
+                card.className = "card";
+                card.id = `sensor-${sensor.device_id}`; // Aquí se asegura el ID correcto
+                document.getElementById("header-sensor-values").appendChild(card);
+            }
             card.innerHTML = `
                 <h3>${sensor.device_name}</h3>
                 <p>${sensor.latest_reading || "No disponible"}</p>
             `;
-            document.getElementById("header-sensor-values").appendChild(card);
         }
+
 
         function createDeviceCard(device) {
             let card = document.querySelector(`#device-${device.device_id}`);

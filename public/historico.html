@@ -23,7 +23,7 @@
                 </ul>
             </nav>
             <div class="footer">
-                <p><a href="/logout">Cerrar sesión</a></p>
+                <p><a href="http://servidor-iot-gael.us-east-1.elasticbeanstalk.com/logout">Cerrar sesión</a></p>
                 <p><a href="/aboutUs.html">Sobre nosotros</a></p>
             </div>
         </aside>
@@ -43,7 +43,7 @@
 <script >
 
 async function fetchHistoricalData() {
-    const response = await fetch('/historicalData');
+    const response = await fetch('http://servidor-iot-gael.us-east-1.elasticbeanstalk.com/historicalData');
     const data = await response.json();
     return data;
 }
